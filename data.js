@@ -50,6 +50,4 @@ const yearColors = {
     "2025": "#ff9f43",
     "2026": "#00d2d3"
 };
-
-const flights = [
-];
+let flights = []; // Hardcoded flights will be loaded from flights.js
