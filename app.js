@@ -1,6 +1,64 @@
 // Mapbox access token
 mapboxgl.accessToken = 'pk.eyJ1IjoiaWZyb3p5IiwiYSI6ImNtMXFobXNjdzAwNzgyanNlejVjdjhueG4ifQ.qEX5cljGQH0AcqeBsq39DQ';
 
+// Check if we're in shared mode (URL has flights parameter)
+const urlParams = new URLSearchParams(window.location.search);
+const sharedFlightsParam = urlParams.get('flights');
+const isSharedMode = !!sharedFlightsParam;
+
+// Encode flights to URL-safe string
+function encodeFlights(flights) {
+    // Convert flights to compact format: airline|flightNum|from|to|date|year
+    const compact = flights.map(f =>
+        `${f.a}|${f.f}|${f.from}|${f.to}|${f.date}|${f.y}`
+    ).join(';');
+    
+    // Base64 encode and make URL-safe
+    return btoa(encodeURIComponent(compact))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
+}
+
+// Decode flights from URL-safe string
+function decodeFlights(encoded) {
+    try {
+        // Restore base64 padding
+        let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+        while (base64.length % 4) {
+            base64 += '=';
+        }
+        
+        // Decode
+        const compact = decodeURIComponent(atob(base64));
+        
+        // Parse flights
+        return compact.split(';').map(flightStr => {
+            const [a, f, from, to, date, y] = flightStr.split('|');
+            return { a, f, from, to, date, y };
+        });
+    } catch (e) {
+        console.error('Failed to decode flights:', e);
+        return [];
+    }
+}
+
+// Share map function
+function shareMap() {
+    const allFlights = getAllFlights();
+    const encoded = encodeFlights(allFlights);
+    const url = `${window.location.origin}${window.location.pathname}?flights=${encoded}`;
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(url).then(() => {
+        alert('Ссылка скопирована в буфер обмена!');
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        // Fallback: show the URL in a prompt
+        prompt('Скопируйте эту ссылку:', url);
+    });
+}
+
 // LocalStorage functions for user flights
 function getUserFlights() {
     const stored = localStorage.getItem('userFlights');
@@ -26,21 +84,193 @@ function deleteUserFlight(flightIndex) {
 
 // Merge hardcoded flights with user flights
 function getAllFlights() {
+    // If in shared mode, return only shared flights
+    if (isSharedMode && sharedFlightsParam) {
+        return decodeFlights(sharedFlightsParam);
+    }
+    
     const userFlights = getUserFlights();
-    return [...flightData.flights, ...userFlights];
+    return [...flights, ...userFlights];
 }
 
 // Toggle add flight form
 function toggleAddFlightForm() {
     const form = document.getElementById('add-flight-form');
+    const importForm = document.getElementById('import-form');
     const toggleBtn = document.getElementById('toggle-form-btn');
+    const importBtn = document.getElementById('toggle-import-btn');
+    
     if (form.style.display === 'none') {
         form.style.display = 'block';
         toggleBtn.textContent = '❌ Закрыть';
+        // Close import form if open
+        importForm.style.display = 'none';
+        importBtn.textContent = '📤';
     } else {
         form.style.display = 'none';
-        toggleBtn.textContent = '➕ Добавить перелет';
+        toggleBtn.textContent = '➕ Добавить';
     }
+}
+
+// Toggle import form
+function toggleImportForm() {
+    const form = document.getElementById('add-flight-form');
+    const importForm = document.getElementById('import-form');
+    const toggleBtn = document.getElementById('toggle-form-btn');
+    const importBtn = document.getElementById('toggle-import-btn');
+    
+    if (importForm.style.display === 'none') {
+        importForm.style.display = 'block';
+        importBtn.textContent = '❌';
+        // Close add flight form if open
+        form.style.display = 'none';
+        toggleBtn.textContent = '➕ Добавить';
+    } else {
+        importForm.style.display = 'none';
+        importBtn.textContent = '📤';
+    }
+}
+
+// Import CSV data
+function importCSV() {
+    const csvInput = document.getElementById('csv-input').value.trim();
+    
+    if (!csvInput) {
+        alert('Пожалуйста, введите данные CSV');
+        return;
+    }
+    
+    const lines = csvInput.split('\n').filter(line => line.trim());
+    const importedFlights = [];
+    const errors = [];
+    
+    lines.forEach((line, index) => {
+        const lineNum = index + 1;
+        const parts = line.split(',').map(p => p.trim());
+        
+        if (parts.length < 5) {
+            errors.push(`Строка ${lineNum}: недостаточно данных (нужно 5 полей)`);
+            return;
+        }
+        
+        const [airline, flightNumber, fromAirport, toAirport, dateTime] = parts;
+        
+        // Validate airports
+        const fromCode = fromAirport.toUpperCase();
+        const toCode = toAirport.toUpperCase();
+        
+        if (!airportCoordinates[fromCode]) {
+            errors.push(`Строка ${lineNum}: аэропорт ${fromCode} не найден`);
+            return;
+        }
+        if (!airportCoordinates[toCode]) {
+            errors.push(`Строка ${lineNum}: аэропорт ${toCode} не найден`);
+            return;
+        }
+        
+        // Parse date and time
+        // Expected format: DD.MM.YYYY HH:MM or DD.MM.YYYY
+        let datePart, year;
+        
+        if (dateTime.includes(' ')) {
+            datePart = dateTime.split(' ')[0];
+        } else {
+            datePart = dateTime;
+        }
+        
+        const dateMatch = datePart.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+        if (!dateMatch) {
+            errors.push(`Строка ${lineNum}: неверный формат даты (ожидается ДД.ММ.ГГГГ)`);
+            return;
+        }
+        
+        year = dateMatch[3];
+        
+        // Create flight object
+        const newFlight = {
+            a: airline || 'Unknown',
+            f: flightNumber || '',
+            from: fromCode,
+            to: toCode,
+            date: datePart,
+            y: year
+        };
+        
+        importedFlights.push(newFlight);
+    });
+    
+    // Show errors if any
+    if (errors.length > 0) {
+        alert('Ошибки при импорте:\n\n' + errors.join('\n') + '\n\nИмпортировано успешно: ' + importedFlights.length + ' из ' + lines.length);
+    }
+    
+    // Import successful flights
+    if (importedFlights.length > 0) {
+        const userFlights = getUserFlights();
+        userFlights.push(...importedFlights);
+        saveUserFlights(userFlights);
+        
+        // Clear input
+        document.getElementById('csv-input').value = '';
+        
+        // Close form
+        toggleImportForm();
+        
+        // Show success message
+        if (errors.length === 0) {
+            alert(`Успешно импортировано ${importedFlights.length} маршрутов!`);
+        }
+        
+        // Reload page to update map
+        location.reload();
+    } else if (errors.length === 0) {
+        alert('Нет данных для импорта');
+    }
+}
+
+// Download all routes as CSV
+function downloadCSV() {
+    const allFlights = getAllFlights();
+    
+    if (allFlights.length === 0) {
+        alert('Нет маршрутов для скачивания');
+        return;
+    }
+    
+    // Convert flights to CSV format: авиалиния,рейс,откуда,куда,датавремя
+    const csvLines = allFlights.map(flight => {
+        const airline = flight.a || 'Unknown';
+        const flightNumber = flight.f || '';
+        const from = flight.from;
+        const to = flight.to;
+        const date = flight.date; // Already in DD.MM.YYYY format
+        
+        return `${airline},${flightNumber},${from},${to},${date}`;
+    });
+    
+    const csvContent = csvLines.join('\n');
+    
+    // Create a blob and download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    // Create download URL
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    
+    // Generate filename with current date
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    link.setAttribute('download', `flight_routes_${dateStr}.csv`);
+    
+    // Trigger download
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the URL
+    URL.revokeObjectURL(url);
 }
 
 // Add flight from form
@@ -94,6 +324,7 @@ function addFlight(event) {
 const airportToCountry = {};
 const airportCoordinates = {};
 const countryFlags = {};
+const airportNames = {};
 
 // Process airports from airports_small.js
 airports.forEach(airport => {
@@ -103,6 +334,7 @@ airports.forEach(airport => {
             airport.longitude_deg,
             airport.latitude_deg
         ];
+        airportNames[airport.iata_code] = airport.name;
         // Store country flag if we have it
         if (airport.icon) {
             countryFlags[airport.iso_country] = airport.icon;
@@ -151,8 +383,8 @@ map.on('style.load', () => {
 
 // Generate color for years not in the predefined list
 function getYearColor(year) {
-    if (flightData.yearColors[year]) {
-        return flightData.yearColors[year];
+    if (yearColors[year]) {
+        return yearColors[year];
     }
     // Generate a color for new years
     const colors = ['#9b59b6', '#34495e', '#16a085', '#27ae60', '#d35400', '#c0392b', '#8e44ad'];
@@ -168,8 +400,8 @@ let visibleYears = new Set(allFlights.map(f => f.y));
 
 // Ensure all years have colors assigned
 allFlights.forEach(flight => {
-    if (flight.y && !flightData.yearColors[flight.y]) {
-        flightData.yearColors[flight.y] = getYearColor(flight.y);
+    if (flight.y && !yearColors[flight.y]) {
+        yearColors[flight.y] = getYearColor(flight.y);
     }
 });
 
@@ -392,6 +624,14 @@ function updateRouteVisibility() {
 // Initialize stats panel
 renderStatsPanel();
 
+// Hide entire add-flight section in shared mode (read-only mode)
+if (isSharedMode) {
+    const addFlightSection = document.querySelector('.add-flight-section');
+    if (addFlightSection) {
+        addFlightSection.style.display = 'none';
+    }
+}
+
 // Function to create a great circle arc between two points
 function createArc(start, end, numPoints = 100) {
     const [lon1, lat1] = start;
@@ -591,7 +831,7 @@ map.on('load', () => {
 
     // Create GeoJSON for flight routes
     const allFlights = getAllFlights();
-    const hardcodedFlightsCount = flightData.flights.length;
+    const hardcodedFlightsCount = flights.length;
     const routeFeatures = allFlights.map((flight, index) => {
         const start = airportCoordinates[flight.from];
         const end = airportCoordinates[flight.to];
@@ -798,15 +1038,19 @@ map.on('load', () => {
             const infoPanel = document.getElementById('info-panel');
             const flightDetail = document.getElementById('flight-detail');
             
-            const deleteButton = props.isUserFlight
+            // Don't show delete button in shared mode
+            const deleteButton = (props.isUserFlight && !isSharedMode)
                 ? `<button class="delete-flight-btn" onclick="deleteUserFlight(${props.userFlightIndex})">🗑️ Удалить перелет</button>`
                 : '';
+            
+            const fromName = airportNames[props.from] || props.from;
+            const toName = airportNames[props.to] || props.to;
             
             flightDetail.innerHTML = `
                 <div class="route-title">${props.airline} | ${props.flightNumber}</div>
                 <div class="route-info">
-                    <strong>Откуда:</strong> ${props.from}<br>
-                    <strong>Куда:</strong> ${props.to}<br>
+                    <strong>Откуда:</strong> ${fromName} (${props.from})<br>
+                    <strong>Куда:</strong> ${toName} (${props.to})<br>
                     <strong>Дата:</strong> ${props.date}
                 </div>
                 ${deleteButton}

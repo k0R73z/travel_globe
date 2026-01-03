@@ -223,8 +223,14 @@ body {
     border-bottom: 2px solid #444;
 }
 
+.button-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
 .toggle-form-btn {
-    width: 100%;
+    flex: 1;
     padding: 8px;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -242,7 +248,44 @@ body {
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-.add-flight-form {
+.toggle-import-btn {
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    min-width: 40px;
+}
+
+.toggle-import-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ddd;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.share-btn {
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    min-width: 40px;
+}
+
+.share-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ddd;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.add-flight-form,
+.import-form {
     margin-top: 10px;
     padding: 10px;
     background: rgba(255, 255, 255, 0.05);
@@ -253,6 +296,52 @@ body {
     margin: 0 0 10px 0;
     font-size: 13px;
     color: #2ecc71;
+}
+
+.import-form h3 {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    color: #f39c12;
+}
+
+.import-hint {
+    font-size: 11px;
+    color: #aaa;
+    margin: 5px 0;
+}
+
+.import-example {
+    font-size: 10px;
+    color: #888;
+    font-style: italic;
+    margin: 5px 0 10px 0;
+    padding: 5px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+#csv-input {
+    width: 100%;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: white;
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 100px;
+}
+
+#csv-input:focus {
+    outline: none;
+    border-color: #f39c12;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+#csv-input::placeholder {
+    color: #666;
 }
 
 .form-row {

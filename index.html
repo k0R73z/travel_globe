@@ -14,7 +14,12 @@
 
 <div id="stats-panel">
     <div class="add-flight-section">
-        <button id="toggle-form-btn" class="toggle-form-btn" onclick="toggleAddFlightForm()">➕ Добавить перелет</button>
+        <div class="button-group">
+            <button id="toggle-form-btn" class="toggle-form-btn" onclick="toggleAddFlightForm()">➕ Добавить</button>
+            <button id="toggle-import-btn" class="toggle-import-btn" onclick="toggleImportForm()" title="Массовый импорт">📤</button>
+            <button id="download-btn" class="toggle-import-btn" onclick="downloadCSV()" title="Скачать маршруты">💾</button>
+            <button id="share-btn" class="share-btn" onclick="shareMap()" title="Поделиться картой">🔗</button>
+        </div>
         <div id="add-flight-form" class="add-flight-form" style="display: none;">
             <h3>Добавить новый перелет</h3>
             <form id="flight-form" onsubmit="addFlight(event)">
@@ -40,6 +45,13 @@
                 </div>
                 <button type="submit" class="submit-btn">Добавить</button>
             </form>
+        </div>
+        <div id="import-form" class="import-form" style="display: none;">
+            <h3>Массовый импорт маршрутов</h3>
+            <p class="import-hint">Формат CSV: авиалиния,рейс,откуда,куда,датавремя</p>
+            <p class="import-example">Пример: Aeroflot,SU 123,SVO,LED,15.03.2024 14:30</p>
+            <textarea id="csv-input" placeholder="Aeroflot,SU 123,SVO,LED,15.03.2024 14:30&#10;S7 Airlines,S7 456,DME,AYT,20.06.2024 10:00" rows="8"></textarea>
+            <button onclick="importCSV()" class="submit-btn">Импортировать</button>
         </div>
     </div>
     
