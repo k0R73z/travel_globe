@@ -1,0 +1,326 @@
+body { 
+    margin: 0; 
+    padding: 0; 
+    background: #000; 
+    overflow: hidden; 
+    color: white; 
+    font-family: 'Segoe UI', sans-serif; 
+}
+
+#map { 
+    width: 100%; 
+    height: 100vh; 
+}
+
+#info-panel {
+    position: absolute; 
+    bottom: 20px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    background: rgba(15, 15, 15, 0.95); 
+    padding: 15px 20px; 
+    border-radius: 10px;
+    border: 1px solid #444; 
+    text-align: center; 
+    min-width: 300px; 
+    max-width: 450px;
+    z-index: 100;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    display: none;
+    transition: opacity 0.3s ease;
+}
+
+#info-panel.visible {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+#flight-detail {
+    line-height: 1.5;
+}
+
+#flight-detail .route-title {
+    color: #3498db; 
+    font-size: 1.1em; 
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+#flight-detail .route-info {
+    font-size: 0.9em;
+    color: #ddd;
+}
+
+#flight-detail .route-info strong {
+    color: #fff;
+}
+
+.mapboxgl-ctrl-logo,
+.mapboxgl-ctrl-attrib {
+    display: none !important;
+}
+
+#stats-panel {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(15, 15, 15, 0.95);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #444;
+    max-width: 280px;
+    max-height: calc(100vh - 30px);
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    font-size: 13px;
+}
+
+#stats-panel h2 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #3498db;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 6px;
+}
+
+#stats-panel h3 {
+    margin: 10px 0 6px 0;
+    font-size: 14px;
+    color: #2ecc71;
+}
+
+.year-filter {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+    padding: 6px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+    background: transparent;
+}
+
+.year-filter.inactive {
+    background: transparent;
+}
+
+.year-filter.active {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.year-filter.inactive:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.year-filter.active:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.year-label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.year-color {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    border: 2px solid #fff;
+}
+
+.year-name {
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.year-count {
+    color: #aaa;
+    font-size: 11px;
+}
+
+.stats-section {
+    margin: 10px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px 0;
+    padding: 3px 0;
+}
+
+.stat-label {
+    color: #ddd;
+    font-size: 12px;
+}
+
+.stat-value {
+    color: #3498db;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.airline-list {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #aaa;
+    line-height: 1.5;
+}
+
+#stats-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+#stats-panel::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+#stats-panel::-webkit-scrollbar-thumb {
+    background: rgba(52, 152, 219, 0.5);
+    border-radius: 3px;
+}
+
+#stats-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(52, 152, 219, 0.8);
+}
+
+.toggle-all {
+    margin: 8px 0;
+    padding: 6px 10px;
+    background: #3498db;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+    font-size: 12px;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.toggle-all:hover {
+    background: #2980b9;
+}
+
+/* Add Flight Form Styles */
+.add-flight-section {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #444;
+}
+
+.toggle-form-btn {
+    width: 100%;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: normal;
+    transition: all 0.2s;
+}
+
+.toggle-form-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ddd;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.add-flight-form {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+}
+
+.add-flight-form h3 {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    color: #2ecc71;
+}
+
+.form-row {
+    margin-bottom: 10px;
+}
+
+.form-row label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: #ddd;
+}
+
+.form-row input {
+    width: 100%;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: white;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.form-row input:focus {
+    outline: none;
+    border-color: #2ecc71;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.form-row input::placeholder {
+    color: #888;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 8px;
+    background: #3498db;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: background 0.2s;
+    margin-top: 5px;
+}
+
+.submit-btn:hover {
+    background: #2980b9;
+}
+
+.delete-flight-btn {
+    width: 100%;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    border-radius: 5px;
+    color: #999;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: normal;
+    transition: all 0.2s;
+    margin-top: 10px;
+}
+
+.delete-flight-btn:hover {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    border-color: rgba(231, 76, 60, 0.5);
+}

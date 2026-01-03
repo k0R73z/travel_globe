@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>3D Глобус перелетов</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css' rel='stylesheet' />
+    <link href='styles.css' rel='stylesheet' />
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="stats-panel">
+    <div class="add-flight-section">
+        <button id="toggle-form-btn" class="toggle-form-btn" onclick="toggleAddFlightForm()">➕ Добавить перелет</button>
+        <div id="add-flight-form" class="add-flight-form" style="display: none;">
+            <h3>Добавить новый перелет</h3>
+            <form id="flight-form" onsubmit="addFlight(event)">
+                <div class="form-row">
+                    <label for="flight-number">Рейс (необязательно):</label>
+                    <input type="text" id="flight-number" placeholder="SU 123">
+                </div>
+                <div class="form-row">
+                    <label for="airline">Авиалиния (необязательно):</label>
+                    <input type="text" id="airline" placeholder="Aeroflot">
+                </div>
+                <div class="form-row">
+                    <label for="from-airport">Аэропорт вылета*:</label>
+                    <input type="text" id="from-airport" placeholder="SVO" required maxlength="3" pattern="[A-Za-z]{3}">
+                </div>
+                <div class="form-row">
+                    <label for="to-airport">Аэропорт прилета*:</label>
+                    <input type="text" id="to-airport" placeholder="LED" required maxlength="3" pattern="[A-Za-z]{3}">
+                </div>
+                <div class="form-row">
+                    <label for="flight-date">Дата*:</label>
+                    <input type="date" id="flight-date" required>
+                </div>
+                <button type="submit" class="submit-btn">Добавить</button>
+            </form>
+        </div>
+    </div>
+    
+    <h2>📊 Статистика перелетов</h2>
+    
+    <h3>Фильтр по годам</h3>
+    <button class="toggle-all" onclick="toggleAllYears()">Показать/Скрыть все</button>
+    <div id="year-filters"></div>
+    
+    <div class="stats-section">
+        <h3>Общая статистика</h3>
+        <div id="overall-stats"></div>
+    </div>
+    
+    <div id="year-stats"></div>
+</div>
+
+<div id="info-panel">
+    <div id="flight-detail"></div>
+</div>
+
+<script src="airports.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
