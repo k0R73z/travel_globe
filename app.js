@@ -625,11 +625,23 @@ function updateRouteVisibility() {
 renderStatsPanel();
 
 // Hide entire add-flight section in shared mode (read-only mode)
+// Show "My Session" button instead
 if (isSharedMode) {
     const addFlightSection = document.querySelector('.add-flight-section');
     if (addFlightSection) {
         addFlightSection.style.display = 'none';
     }
+    
+    const mySessionSection = document.getElementById('my-session-section');
+    if (mySessionSection) {
+        mySessionSection.style.display = 'block';
+    }
+}
+
+// Function to open user's own session (without ?flights parameter)
+function openMySession() {
+    const url = `${window.location.origin}${window.location.pathname}`;
+    window.location.href = url;
 }
 
 // Function to create a great circle arc between two points
