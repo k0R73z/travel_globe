@@ -6,21 +6,25 @@ const urlParams = new URLSearchParams(window.location.search);
 const sharedFlightsParam = urlParams.get('flights');
 const isSharedMode = !!sharedFlightsParam;
 
-// Encode flights to URL-safe string
+// Encode flights to URL-safe string with gzip compression
 function encodeFlights(flights) {
     // Convert flights to compact format: airline|flightNum|from|to|date|year
     const compact = flights.map(f =>
         `${f.a}|${f.f}|${f.from}|${f.to}|${f.date}|${f.y}`
     ).join(';');
     
-    // Base64 encode and make URL-safe
-    return btoa(encodeURIComponent(compact))
+    // Compress with gzip
+    const compressed = pako.deflate(compact);
+    
+    // Convert to base64 and make URL-safe
+    const base64 = btoa(String.fromCharCode.apply(null, compressed));
+    return base64
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
         .replace(/=/g, '');
 }
 
-// Decode flights from URL-safe string
+// Decode flights from URL-safe string with gzip decompression
 function decodeFlights(encoded) {
     try {
         // Restore base64 padding
@@ -29,11 +33,18 @@ function decodeFlights(encoded) {
             base64 += '=';
         }
         
-        // Decode
-        const compact = decodeURIComponent(atob(base64));
+        // Decode base64 to binary
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        // Decompress with gzip
+        const decompressed = pako.inflate(bytes, { to: 'string' });
         
         // Parse flights
-        return compact.split(';').map(flightStr => {
+        return decompressed.split(';').map(flightStr => {
             const [a, f, from, to, date, y] = flightStr.split('|');
             return { a, f, from, to, date, y };
         });
