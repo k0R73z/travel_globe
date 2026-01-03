@@ -743,44 +743,6 @@ map.on('load', () => {
         }
     }, 'waterway-label');
 
-    // Add country labels (enhanced)
-    map.addLayer({
-        id: 'country-labels-enhanced',
-        type: 'symbol',
-        source: {
-            type: 'vector',
-            url: 'mapbox://mapbox.country-boundaries-v1'
-        },
-        'source-layer': 'country_boundaries',
-        layout: {
-            'text-field': ['get', 'name_en'],
-            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-            'text-size': [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                1, 6,
-                4, 9,
-                8, 14
-            ],
-            'text-transform': 'uppercase',
-            'text-letter-spacing': 0.1
-        },
-        paint: {
-            'text-color': '#8899bb',
-            'text-halo-color': '#000000',
-            'text-halo-width': 2,
-            'text-opacity': [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                1, 0.6,
-                3, 0.8,
-                5, 1
-            ]
-        }
-    });
-
     // Add major cities layer
     map.addSource('major-cities', {
         type: 'geojson',
