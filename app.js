@@ -161,15 +161,16 @@ function getYearColor(year) {
 }
 
 let hoveredRouteId = null;
-let visibleYears = new Set(Object.keys(flightData.yearColors));
 
-// Add user flight years to visible years
-const userFlights = getUserFlights();
-userFlights.forEach(flight => {
+// Initialize visible years with all years from all flights
+const allFlights = getAllFlights();
+let visibleYears = new Set(allFlights.map(f => f.y));
+
+// Ensure all years have colors assigned
+allFlights.forEach(flight => {
     if (flight.y && !flightData.yearColors[flight.y]) {
         flightData.yearColors[flight.y] = getYearColor(flight.y);
     }
-    visibleYears.add(flight.y);
 });
 
 // Function to extract visited countries from flight data
@@ -266,12 +267,15 @@ function calculateStats() {
 function renderStatsPanel() {
     const stats = calculateStats();
     
+    // Get all years from stats (includes both hardcoded and user flights)
+    const allYears = Object.keys(stats.byYear).sort().reverse();
+    
     // Render year filters
     const yearFiltersDiv = document.getElementById('year-filters');
-    yearFiltersDiv.innerHTML = Object.keys(flightData.yearColors).sort().reverse().map(year => `
+    yearFiltersDiv.innerHTML = allYears.map(year => `
         <div class="year-filter active" id="filter-${year}" onclick="toggleYear('${year}')">
             <div class="year-label">
-                <div class="year-color" style="background-color: ${flightData.yearColors[year]}"></div>
+                <div class="year-color" style="background-color: ${getYearColor(year)}"></div>
                 <span class="year-name">${year}</span>
                 <span class="year-count">(${stats.byYear[year].flights} рейсов)</span>
             </div>
@@ -303,9 +307,9 @@ function renderStatsPanel() {
     
     // Render per-year statistics
     const yearStatsDiv = document.getElementById('year-stats');
-    yearStatsDiv.innerHTML = Object.keys(flightData.yearColors).sort().reverse().map(year => `
+    yearStatsDiv.innerHTML = allYears.map(year => `
         <div class="stats-section">
-            <h3 style="color: ${flightData.yearColors[year]}">${year}</h3>
+            <h3 style="color: ${getYearColor(year)}">${year}</h3>
             <div class="stat-row">
                 <span class="stat-label">Перелетов:</span>
                 <span class="stat-value">${stats.byYear[year].flights}</span>
@@ -347,21 +351,28 @@ function toggleYear(year) {
 
 // Toggle all years
 function toggleAllYears() {
-    if (visibleYears.size === Object.keys(flightData.yearColors).length) {
+    const allFlights = getAllFlights();
+    const allYears = [...new Set(allFlights.map(f => f.y))];
+    
+    if (visibleYears.size === allYears.length) {
         // Hide all
         visibleYears.clear();
-        Object.keys(flightData.yearColors).forEach(year => {
+        allYears.forEach(year => {
             const filterElement = document.getElementById(`filter-${year}`);
-            filterElement.classList.remove('active');
-            filterElement.classList.add('inactive');
+            if (filterElement) {
+                filterElement.classList.remove('active');
+                filterElement.classList.add('inactive');
+            }
         });
     } else {
         // Show all
-        visibleYears = new Set(Object.keys(flightData.yearColors));
-        Object.keys(flightData.yearColors).forEach(year => {
+        visibleYears = new Set(allYears);
+        allYears.forEach(year => {
             const filterElement = document.getElementById(`filter-${year}`);
-            filterElement.classList.remove('inactive');
-            filterElement.classList.add('active');
+            if (filterElement) {
+                filterElement.classList.remove('inactive');
+                filterElement.classList.add('active');
+            }
         });
     }
     updateRouteVisibility();
