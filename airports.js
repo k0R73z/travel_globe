@@ -58139,9 +58139,9 @@ const airports = [
     "name": "Simferopol International Airport",
     "latitude_deg": 45.0522,
     "longitude_deg": 33.975101,
-    "iso_country": "UA",
+    "iso_country": "RU",
     "iata_code": "SIP",
-    "icon": "🇺🇦"
+    "icon": "🇷🇺"
   },
   {
     "name": "Kerch Airport",
