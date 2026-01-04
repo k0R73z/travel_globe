@@ -1066,6 +1066,13 @@ map.on('load', () => {
     map.on('zoomstart', () => { userInteracting = true; });
     map.on('zoomend', () => { userInteracting = false; });
     map.on('wheel', () => { userInteracting = true; });
+    
+    // Touch events for mobile
+    map.on('touchstart', () => { userInteracting = true; });
+    map.on('touchend', () => {
+        setTimeout(() => { userInteracting = false; }, 300);
+    });
+    map.on('touchmove', () => { userInteracting = true; });
 
     function spinGlobe() {
         if (spinEnabled && !userInteracting) {
@@ -1086,4 +1093,71 @@ map.on('load', () => {
             userInteracting = false;
         }, 150);
     });
+});
+
+// Mobile: Collapsible stats panel
+function initMobilePanel() {
+    if (window.innerWidth <= 768) {
+        const statsPanel = document.getElementById('stats-panel');
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+        
+        // Toggle panel on tap of the handle area
+        statsPanel.addEventListener('touchstart', (e) => {
+            const rect = statsPanel.getBoundingClientRect();
+            const touchY = e.touches[0].clientY;
+            
+            // Check if touch is in the handle area (top 30px)
+            if (touchY - rect.top < 30) {
+                startY = touchY;
+                isDragging = true;
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        statsPanel.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            
+            currentY = e.touches[0].clientY;
+            const deltaY = currentY - startY;
+            
+            // Only allow downward dragging when expanded, upward when collapsed
+            if (deltaY > 50 && !statsPanel.classList.contains('collapsed')) {
+                statsPanel.classList.add('collapsed');
+                isDragging = false;
+            } else if (deltaY < -50 && statsPanel.classList.contains('collapsed')) {
+                statsPanel.classList.remove('collapsed');
+                isDragging = false;
+            }
+        }, { passive: true });
+        
+        statsPanel.addEventListener('touchend', () => {
+            isDragging = false;
+        }, { passive: true });
+        
+        // Start collapsed on mobile
+        statsPanel.classList.add('collapsed');
+    }
+}
+
+// Initialize mobile panel on load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMobilePanel);
+} else {
+    initMobilePanel();
+}
+
+// Re-initialize on window resize
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        const statsPanel = document.getElementById('stats-panel');
+        if (window.innerWidth > 768) {
+            statsPanel.classList.remove('collapsed');
+        } else {
+            statsPanel.classList.add('collapsed');
+        }
+    }, 250);
 });

@@ -81,6 +81,7 @@ body {
     box-shadow: 0 8px 32px rgba(0,0,0,0.7);
     backdrop-filter: blur(10px);
     font-size: 13px;
+    pointer-events: auto;
 }
 
 #stats-panel h2 {
@@ -443,4 +444,163 @@ body {
     background: rgba(231, 76, 60, 0.2);
     color: #e74c3c;
     border-color: rgba(231, 76, 60, 0.5);
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+    #stats-panel {
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-width: 100%;
+        max-height: 40vh;
+        border-radius: 15px 15px 0 0;
+        border-bottom: none;
+        padding: 10px 15px 15px 15px;
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+    
+    #stats-panel.collapsed {
+        transform: translateY(calc(100% - 50px));
+    }
+    
+    #stats-panel::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+    }
+    
+    #stats-panel h2 {
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    
+    #stats-panel h3 {
+        font-size: 12px;
+    }
+    
+    .button-group {
+        flex-wrap: wrap;
+    }
+    
+    .toggle-form-btn,
+    .toggle-import-btn,
+    .share-btn {
+        font-size: 11px;
+        padding: 6px 8px;
+    }
+    
+    .year-filter {
+        padding: 4px;
+    }
+    
+    .year-name {
+        font-size: 12px;
+    }
+    
+    .year-count {
+        font-size: 10px;
+    }
+    
+    .stat-label,
+    .stat-value {
+        font-size: 11px;
+    }
+    
+    .airline-list {
+        font-size: 10px;
+    }
+    
+    .form-row label {
+        font-size: 10px;
+    }
+    
+    .form-row input {
+        font-size: 11px;
+        padding: 5px 6px;
+    }
+    
+    #csv-input {
+        font-size: 10px;
+    }
+    
+    .submit-btn {
+        font-size: 11px;
+        padding: 6px;
+    }
+    
+    .toggle-all {
+        font-size: 11px;
+        padding: 5px 8px;
+    }
+    
+    #info-panel {
+        bottom: auto;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        transform: none;
+        min-width: auto;
+        max-width: none;
+        padding: 12px 15px;
+        font-size: 12px;
+    }
+    
+    #info-panel .route-title {
+        font-size: 1em;
+    }
+    
+    #info-panel .route-info {
+        font-size: 0.85em;
+    }
+    
+    .delete-flight-btn {
+        font-size: 10px;
+        padding: 5px;
+    }
+    
+    .my-session-btn {
+        font-size: 12px;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    #stats-panel {
+        max-height: 45vh;
+        font-size: 11px;
+    }
+    
+    #stats-panel h2 {
+        font-size: 13px;
+    }
+    
+    #stats-panel h3 {
+        font-size: 11px;
+    }
+    
+    .button-group {
+        gap: 5px;
+    }
+    
+    .toggle-form-btn,
+    .toggle-import-btn,
+    .share-btn {
+        font-size: 10px;
+        padding: 5px 6px;
+        min-width: 35px;
+    }
+    
+    #info-panel {
+        font-size: 11px;
+        padding: 10px 12px;
+    }
 }
